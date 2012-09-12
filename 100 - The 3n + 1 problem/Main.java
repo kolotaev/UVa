@@ -27,10 +27,10 @@ public class Main
 			b = c;
 		}
 		
-		for (int i = b; i >= a && a != 1; i--)
+		for (int i = a; i <= b && b != 1; i++)
 		{
 			int x = i;
-			int count = 1;
+			int count = 2;
 			while (x > 1)
 			{
 				if (x%2 == 0)
@@ -38,7 +38,8 @@ public class Main
 				else
 					x = 3*x + 1;
 
-				count++;
+				if(x > 1)
+					count++;
 			}
 			if (count > max)
 				max = count;
