@@ -3,6 +3,7 @@ import java.util.*;
 
 public class Main 
 {
+	public static int[] cache = new int[1000001];
 	public static void main(String[] args) 
 	{
 		int a, b, cycle;
@@ -30,17 +31,25 @@ public class Main
 		for (int i = a; i <= b && b != 1; i++)
 		{
 			int x = i;
-			int count = 2;
-			while (x > 1)
+			int count = 1;
+			
+			if (cache[i] == 0)
 			{
-				if (x%2 == 0)
-					x /= 2;
-				else
-					x = 3*x + 1;
-
-				if(x > 1)
+				while (x > 1)
+				{
+					if (x%2 == 0)
+						x /= 2;
+					else
+						x = 3*x + 1;
 					count++;
+				}
+				cache[i] = count;
 			}
+			else 
+			{
+				count = cache[i];
+			}
+
 			if (count > max)
 				max = count;
 		}
