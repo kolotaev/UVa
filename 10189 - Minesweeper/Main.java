@@ -13,9 +13,11 @@ public class Main
 		}
 		catch (Exception e)
 		{
+			
 			System.out.println(e.getMessage());
 			e.printStackTrace();
 			System.out.println();
+			
 		}
 	}
 	
@@ -32,7 +34,7 @@ public class Main
 			m = in.nextInt();
 			if (n == m && n == 0)
 			{
-				System.exit(0);
+				break;
 			}
 			else 
 			{
@@ -56,6 +58,8 @@ public class Main
 				result = sweep(data, n, m);
 				
 				// Printing the result
+				if (count != 1)
+					System.out.println();
 				System.out.println("Field #" + count + ":");
 				for (int i=0; i < n; i++)
 				{
@@ -65,7 +69,6 @@ public class Main
 					}
 					System.out.println();
 				}
-				System.out.println();
 			}
 		}
 	}
