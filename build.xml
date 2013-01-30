@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="UVa" default="run">
+<project name="UVa" default="cleanup">
 
     <description>Used to run local tests in IDEA</description>
 
     <property name="build-dir" value="classes" />
+    <property name="src" value="src" />
+    <property name="main" value="Main" />
 
     <target name="init">
         <mkdir dir="${build-dir}" />
@@ -13,8 +15,15 @@
         <delete dir="${build-dir}" />
     </target>
 
-    <target name="run">
+    <target name="compile" depends="init">
+        <javac srcdir="${src}" destdir="${build-dir}" />
+    </target>
+
+    <target name="run" depends="compile">
         <echo> -- Run! -- </echo>
+        <java classname="${main}" classpath="${build-dir}">
+            <arg value="1.txt" />
+        </java>
     </target>
 
 </project>
