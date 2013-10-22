@@ -1,43 +1,32 @@
 import java.io.*;
 import java.util.*;
 
-public class Main 
-{
-	public static void main(String[] args)
-	{
+public class Main {
+
+	public static void main(String[] args) {
 		Scanner in = new Scanner(new BufferedInputStream(System.in));
 		Main aMain = new Main();
-		try
-		{
+		try {
 			aMain.run(in);
-		}
-		catch (Exception e)
-		{
-			
+		} catch (Exception e) {
 			System.out.println(e.getMessage());
 			e.printStackTrace();
 			System.out.println();
-			
 		}
 	}
 	
-	private void run(Scanner in)
-	{
+	private void run(Scanner in) {
 		int n, m;
 		String line;
 		char[][] data, result;
 		byte count = 0;
 		
-		while (in.hasNext())
-		{
+		while (in.hasNext()) {
 			n = in.nextInt();
 			m = in.nextInt();
-			if (n == m && n == 0)
-			{
+			if (n == m && n == 0) {
 				break;
-			}
-			else 
-			{
+			} else {
 				in.nextLine();
 				// Initialization of each loop
 				data = new char[n][m];
@@ -45,11 +34,9 @@ public class Main
 				count++;
 				
 				// Filling initial data
-				for (int i=0; i < n; i++)
-				{
+				for (int i=0; i < n; i++) {
 					line = in.nextLine();
-					for (int j=0; j < m; j++)
-					{
+					for (int j=0; j < m; j++) {
 						data[i][j] = line.charAt(j);
 					}
 				}
@@ -58,13 +45,14 @@ public class Main
 				result = sweep(data, n, m);
 				
 				// Printing the result
-				if (count != 1)
-					System.out.println();
+				if (count != 1) {
+                    System.out.println();
+                }
+
 				System.out.println("Field #" + count + ":");
-				for (int i=0; i < n; i++)
-				{
-					for (int j=0; j < m; j++)
-					{
+
+				for (int i=0; i < n; i++) {
+					for (int j=0; j < m; j++) {
 						System.out.print(result[i][j]);
 					}
 					System.out.println();
@@ -73,33 +61,38 @@ public class Main
 		}
 	}
 	
-	private char[][] sweep(char[][] data, int n, int m)
-	{
+	private char[][] sweep(char[][] data, int n, int m) {
 		char[][] res = data;
 		byte mines;
-		for (int i=0; i < n; i++)
-		{
-			for (int j=0; j < m; j++)
-			{
-				if (data[i][j] == '.')
-				{
+
+		for (int i=0; i < n; i++) {
+			for (int j=0; j < m; j++) {
+				if (data[i][j] == '.') {
 					mines = 0;
-					if ((i-1 >= 0) && (data[i-1][j] == '*'))
+					if ((i-1 >= 0) && (data[i-1][j] == '*')) {
+                        mines++;
+                    }
+					if ((i-1 >= 0) && (j+1 <= m-1) && (data[i-1][j+1] == '*')) {
 						mines++;
-					if ((i-1 >= 0) && (j+1 <= m-1) && (data[i-1][j+1] == '*'))
+                    }
+					if ((j+1 <= m-1) && (data[i][j+1] == '*')) {
 						mines++;
-					if ((j+1 <= m-1) && (data[i][j+1] == '*'))
+                    }
+					if ((i+1 <= n-1) && (j+1 <= m-1) && (data[i+1][j+1] == '*')) {
 						mines++;
-					if ((i+1 <= n-1) && (j+1 <= m-1) && (data[i+1][j+1] == '*'))
+                    }
+					if ((i+1 <= n-1) && (data[i+1][j] == '*')) {
 						mines++;
-					if ((i+1 <= n-1) && (data[i+1][j] == '*'))
+                    }
+					if ((i+1 <= n-1) && (j-1 >= 0) && (data[i+1][j-1] == '*')) {
 						mines++;
-					if ((i+1 <= n-1) && (j-1 >= 0) && (data[i+1][j-1] == '*'))
+                    }
+					if ((j-1 >= 0) && (data[i][j-1] == '*')) {
 						mines++;
-					if ((j-1 >= 0) && (data[i][j-1] == '*'))
+                    }
+					if ((i-1 >= 0) && (j-1 >= 0) && (data[i-1][j-1] == '*')) {
 						mines++;
-					if ((i-1 >= 0) && (j-1 >= 0) && (data[i-1][j-1] == '*'))
-						mines++;
+                    }
 					
 					res[i][j] = (char)(mines+48);
 				}
