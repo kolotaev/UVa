@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 echo "You are in $(pwd) directory"
 mkdir ../src
