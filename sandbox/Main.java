@@ -8,7 +8,7 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            System.setIn(new FileInputStream(args[0]));
+            //System.setIn(new FileInputStream(args[0]));
 
             Scanner in = new Scanner(new BufferedInputStream(System.in));
             Main aMain = new Main();
@@ -37,7 +37,7 @@ public class Main {
                 a = Integer.parseInt(args[0]);
                 b = Integer.parseInt(args[1]);
                 if (isValidXY(a, b))
-                    paintPixel(a, b, args[2].charAt(0));
+                    setPixel(a, b, args[2].charAt(0));
                 break;
             case "V":
                 a = Integer.parseInt(args[0]);
@@ -65,7 +65,7 @@ public class Main {
                 a = Integer.parseInt(args[0]);
                 b = Integer.parseInt(args[1]);
                 if (isValidXY(a, b))
-                    fillFromPosition(a-1, b-1, args[2].charAt(0));
+                    fillFromPosition(a, b, args[2].charAt(0));
                 break;
         }
     }
@@ -93,23 +93,27 @@ public class Main {
                 image[i][j] = 'O';
     }
 
-    public void paintPixel(int x, int y, char color) {
+    public void setPixel(int x, int y, char color) {
         image[y-1][x-1] = color;
+    }
+
+    public char getPixel(int x, int y) {
+        return image[y-1][x-1];
     }
 
     public void paintVerticalLine(int x, int y1, int y2, char color) {
         if (y1 > y2) { int tmp = y1; y1 = y2; y2 = tmp; }
 
-        for (int i = y1-1; i <= y2-1; i++) {
-            image[i][x-1] = color;
+        for (int i = y1; i <= y2; i++) {
+            setPixel(x, i, color);
         }
     }
 
     public void paintHorizontalLine(int x1, int x2, int y, char color) {
         if (x1 > x2) { int tmp = x1; x1 = x2; x2 = tmp; }
 
-        for (int i = x1-1; i <= x2-1; i++) {
-            image[y-1][i] = color;
+        for (int i = x1; i <= x2; i++) {
+            setPixel(i, y, color);
         }
     }
 
@@ -117,41 +121,21 @@ public class Main {
         if (x1 > x2) { int tmp = x1; x1 = x2; x2 = tmp; }
         if (y1 > y2) { int tmp = y1; y1 = y2; y2 = tmp; }
 
-        for (int i = y1-1; i <= y2-1; i++)
-            for (int j = x1-1; j <= x2-1; j++)
-                image[i][j] = color;
+        for (int i = y1; i <= y2; i++)
+            for (int j = x1; j <= x2; j++)
+                setPixel(j, i, color);
     }
 
     public void fillFromPosition(int x, int y, char color) {
-        char previousColor = image[y][x];
-        image[y][x] = color;
+        if (!withinSize(x-1, y-1)) return;
+        char previousColor = getPixel(x, y);
+        if (getPixel(x, y) != previousColor) return;
+        setPixel(x, y, color);
 
-//        int colorCount = 0;
-//        for (int i = 0; i < height; i++)
-//            for (int j = 0; j < width; j++)
-//                if (image[i][j] == color) colorCount++;
-//
-//        if (colorCount == height * width || colorCount == height * width - 1) return;
-
-//        if (color == previousColor)
-//            fillFromPosition(x, y, '~');
-
-        int[][] neighbourPixels = new int[4][2];
-        neighbourPixels[0][0] = x - 1;
-        neighbourPixels[0][1] = y;
-
-        neighbourPixels[1][0] = x + 1;
-        neighbourPixels[1][1] = y;
-
-        neighbourPixels[2][0] = x;
-        neighbourPixels[2][1] = y - 1;
-
-        neighbourPixels[3][0] = x;
-        neighbourPixels[3][1] = y + 1;
-
-        for (int[] p : neighbourPixels)
-            if (withinSize(p[0], p[1]) && image[p[1]][p[0]] == previousColor)
-                fillFromPosition(p[0], p[1], color);
+            fillFromPosition(x-1, y, color);
+            fillFromPosition(x+1, y, color);
+            fillFromPosition(x, y-1, color);
+            fillFromPosition(x, y+1, color);
     }
 
     private boolean withinSize(int x, int y) {
