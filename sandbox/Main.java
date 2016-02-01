@@ -4,6 +4,7 @@ import java.util.*;
 public class Main {
     private int count, currentPosition;
     private int[] ram, registers;
+    private boolean jump;
 
     public static void main(String[] args) {
         try {
@@ -26,7 +27,8 @@ public class Main {
     public Main(Scanner in) {
         ram = new int[1000];
         registers = new int[10];
-        count = currentPosition = 0;
+        count = 0;
+        currentPosition = 0;
         String line;
         for (int i = 0; i < ram.length && in.hasNextLine(); i++) {
             line = in.nextLine();
@@ -37,13 +39,9 @@ public class Main {
 
     public void run() {
         while (currentPosition < ram.length) {
-            int stepsToExecute = ram.length - currentPosition;
-            for (int i = currentPosition; i < stepsToExecute; ) {
-                if (i != currentPosition) break;
-                execute(ram[i]);
-                if (currentPosition == i) currentPosition++;
-                i++;
-            }
+            jump = false;
+            execute(ram[currentPosition]);
+            if (!jump) currentPosition++;
         }
 
         System.out.println(count);
@@ -112,8 +110,11 @@ public class Main {
     }
 
     public void jumpToRamAddress(int a, int b) {
-        if (registers[b] != 0)
+        if (registers[b] != 0) {
             currentPosition = registers[a];
+            jump = true;
+        }
+
     }
 
     private int ensure(int value) {
