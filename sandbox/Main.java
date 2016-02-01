@@ -7,7 +7,7 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-//            System.setIn(new FileInputStream(args[0]));
+            System.setIn(new FileInputStream(args[0]));
 
             Scanner in = new Scanner(new BufferedInputStream(System.in));
             int cycles = Integer.parseInt(in.nextLine());
