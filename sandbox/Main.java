@@ -41,6 +41,7 @@ public class Main {
         while (currentPosition < ram.length) {
             jump = false;
             execute(ram[currentPosition]);
+            count++;
             if (!jump) currentPosition++;
         }
 
@@ -67,8 +68,6 @@ public class Main {
             case 9: setRamFromRegister(a, b); break;
             case 0: jumpToRamAddress(a, b); break;
         }
-
-        count++;
     }
 
     public void halt() {
