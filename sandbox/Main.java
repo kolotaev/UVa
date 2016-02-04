@@ -89,3 +89,4 @@ public class Main {
         check(i-1, j, figure);
     }
 }
+
