@@ -2,8 +2,8 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
-    char[][] board;
-    String answer;
+    private char[][] board;
+    private String answer;
 
     public static void main(String[] args) {
         try {
@@ -29,9 +29,8 @@ public class Main {
                 in.nextLine();
                 if (emptyRows != 8) {
                     boardsCount++;
-//                    if (boardsCount > 1) System.out.println();
-                    aMain.run(board);
-                    System.out.println("Game #" + boardsCount + ": " + aMain.answer + " king is in check.");
+                    String answer = aMain.run(board);
+                    System.out.println("Game #" + boardsCount + ": " + answer + " king is in check.");
                 }
             }
         } catch (Exception e) {
@@ -41,7 +40,7 @@ public class Main {
         }
     }
 
-    public void run(char[][] givenBoard) {
+    public String run(char[][] givenBoard) {
         board = givenBoard;
         answer = "no";
         for (byte i = 0; i < 8; i++) {
@@ -54,9 +53,10 @@ public class Main {
                     case 'p': case 'P' : movePawn(i, j); break;
                     case 'k': case 'K' : moveKing(i, j); break;
                 }
-                if (!answer.equals("no")) return;
+                if (!answer.equals("no")) return answer;
             }
         }
+        return answer;
     }
 
     public boolean check(int i, int j, char figure) {
