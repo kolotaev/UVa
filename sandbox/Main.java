@@ -33,6 +33,7 @@ public class Main {
                     System.out.println("Game #" + boardsCount + ": " + answer + " king is in check.");
                 }
             }
+            System.out.println(); /// ????????
         } catch (Exception e) {
             System.out.println(e.getMessage());
             e.printStackTrace();
@@ -59,73 +60,79 @@ public class Main {
         return answer;
     }
 
-    public boolean check(int i, int j, char figure) {
+    public boolean check(int i, int j, char piece) {
         if (i >= 0 && i < 8 && j >= 0 && j < 8) {
             if (board[i][j] != '.' && board[i][j] != 'k' && board[i][j] != 'K')
                 return false;
 
-            if (Character.isUpperCase(figure) && board[i][j] == 'k')
+            if (Character.isUpperCase(piece) && piece != 'K' && board[i][j] == 'k') {
                 answer = "black";
-            else if (Character.isLowerCase(figure) && board[i][j] == 'K')
+                return false;
+            }
+            else if (Character.isLowerCase(piece) && piece != 'k' && board[i][j] == 'K') {
                 answer = "white";
+                return false;
+            }
+            else
+                return true;
         }
-        return true;
+        return false;
     }
 
     public void movePawn(int i, int j) {
-        char figure = board[i][j];
-        if (figure == 'p') {
-            check(i+1, j-1, figure);
-            check(i+1, j+1, figure);
+        char piece = board[i][j];
+        if (Character.isLowerCase(piece)) {
+            check(i+1, j-1, piece);
+            check(i+1, j+1, piece);
         } else {
-            check(i-1, j-1, figure);
-            check(i-1, j+1, figure);
+            check(i-1, j-1, piece);
+            check(i-1, j+1, piece);
         }
     }
 
     public void moveKing(int i, int j) {
-        char figure = board[i][j];
-        check(i, j+1, figure);
-        check(i, j-1, figure);
-        check(i+1, j, figure);
-        check(i-1, j, figure);
+        char piece = board[i][j];
+        check(i, j+1, piece);
+        check(i, j-1, piece);
+        check(i+1, j, piece);
+        check(i-1, j, piece);
 
-        check(i-1, j-1, figure);
-        check(i-1, j+1, figure);
-        check(i+1, j+1, figure);
-        check(i+1, j-1, figure);
+        check(i-1, j-1, piece);
+        check(i+1, j+1, piece);
+        check(i-1, j+1, piece);
+        check(i+1, j-1, piece);
     }
 
     public void moveRook(int i, int j) {
-        char figure = board[i][j];
+        char piece = board[i][j];
 
         for (int a = i+1; a < 8; a++)
-            if (!check(a, j, figure)) break;
+            if (!check(a, j, piece)) break;
 
         for (int a = i-1; a >= 0; a--)
-            if (!check(a, j, figure)) break;
+            if (!check(a, j, piece)) break;
 
         for (int a = j+1; a < 8; a++)
-            if (!check(i, a, figure)) break;
+            if (!check(i, a, piece)) break;
 
         for (int a = j-1; a >= 0; a--)
-            if (!check(i, a, figure)) break;
+            if (!check(i, a, piece)) break;
     }
 
     void moveBishop(int i, int j) {
-        char figure = board[i][j];
+        char piece = board[i][j];
 
         for (int a = i+1, b = j-1; (a < 8) && (b >= 0); a++, b--)
-            if (!check(a, b, figure)) break;
+            if (!check(a, b, piece)) break;
 
         for (int a = i+1, b = j+1; (a < 8) && (b < 8); a++, b++)
-            if (!check(a, b, figure)) break;
+            if (!check(a, b, piece)) break;
 
         for (int a = i-1, b = j-1; (a >= 0) && (b >= 0); a--, b--)
-            if (!check(a, b, figure)) break;
+            if (!check(a, b, piece)) break;
 
         for (int a = i-1, b = j+1; (a >= 0) && (b < 8); a--, b++)
-            if (!check(a, b, figure)) break;
+            if (!check(a, b, piece)) break;
     }
 
     void moveQueen(int i, int j) {
@@ -134,15 +141,15 @@ public class Main {
     }
 
     void moveKnight(int i, int j) {
-        char figure = board[i][j];
-        check(i-2, j+1, figure);
-        check(i-2, j-1, figure);
-        check(i+2, j+1, figure);
-        check(i+2, j-1, figure);
+        char piece = board[i][j];
+        check(i-2, j+1, piece);
+        check(i-2, j-1, piece);
+        check(i+2, j+1, piece);
+        check(i+2, j-1, piece);
 
-        check(i-1, j+2, figure);
-        check(i-1, j-2, figure);
-        check(i+1, j+2, figure);
-        check(i+1, j-2, figure);
+        check(i-1, j+2, piece);
+        check(i-1, j-2, piece);
+        check(i+1, j+2, piece);
+        check(i+1, j-2, piece);
     }
 }
