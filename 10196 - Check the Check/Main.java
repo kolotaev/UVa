@@ -7,8 +7,6 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            System.setIn(new FileInputStream(args[0]));
-
             Scanner in = new Scanner(new BufferedInputStream(System.in));
             Main aMain = new Main();
 
@@ -17,7 +15,7 @@ public class Main {
             String row;
             char [][] board = new char[8][8];
 
-            while (emptyRows != 8) {
+            while (emptyRows < 8) {
                 emptyRows = 0;
                 for (int i = 0; i < 8; i++) {
                     row = in.nextLine();
@@ -26,14 +24,13 @@ public class Main {
                         board[i][j] = row.charAt(j);
                     }
                 }
-                in.nextLine();
-                if (emptyRows != 8) {
+                if (in.hasNextLine()) in.nextLine();
+                if (emptyRows < 8) {
                     boardsCount++;
                     String answer = aMain.run(board);
                     System.out.println("Game #" + boardsCount + ": " + answer + " king is in check.");
                 }
             }
-            System.out.println(); /// ????????
         } catch (Exception e) {
             System.out.println(e.getMessage());
             e.printStackTrace();
@@ -47,12 +44,12 @@ public class Main {
         for (byte i = 0; i < 8; i++) {
             for (byte j = 0; j < 8; j++) {
                 switch (board[i][j]) {
-                    case 'q': case 'Q' : moveQueen(i, j); break;
-                    case 'r': case 'R' : moveRook(i, j); break;
-                    case 'b': case 'B' : moveBishop(i, j); break;
-                    case 'n': case 'N' : moveKnight(i, j); break;
-                    case 'p': case 'P' : movePawn(i, j); break;
-                    case 'k': case 'K' : moveKing(i, j); break;
+                    case 'q': case 'Q': moveQueen(i, j); break;
+                    case 'r': case 'R': moveRook(i, j); break;
+                    case 'b': case 'B': moveBishop(i, j); break;
+                    case 'n': case 'N': moveKnight(i, j); break;
+                    case 'p': case 'P': movePawn(i, j); break;
+                    // case k - Kings' moves in this challenge doesn't matter.
                 }
                 if (!answer.equals("no")) return answer;
             }
@@ -61,22 +58,15 @@ public class Main {
     }
 
     public boolean check(int i, int j, char piece) {
-        if (i >= 0 && i < 8 && j >= 0 && j < 8) {
-            if (board[i][j] != '.' && board[i][j] != 'k' && board[i][j] != 'K')
-                return false;
+        boolean goOn = false;
 
-            if (Character.isUpperCase(piece) && piece != 'K' && board[i][j] == 'k') {
-                answer = "black";
-                return false;
-            }
-            else if (Character.isLowerCase(piece) && piece != 'k' && board[i][j] == 'K') {
-                answer = "white";
-                return false;
-            }
-            else
-                return true;
+        if (i >= 0 && i < 8 && j >= 0 && j < 8) {
+            if (Character.isUpperCase(piece) && board[i][j] == 'k') answer = "black";
+            else if (Character.isLowerCase(piece) && board[i][j] == 'K') answer = "white";
+            else if (board[i][j] == '.') goOn = true;
         }
-        return false;
+
+        return goOn;
     }
 
     public void movePawn(int i, int j) {
@@ -88,19 +78,6 @@ public class Main {
             check(i-1, j-1, piece);
             check(i-1, j+1, piece);
         }
-    }
-
-    public void moveKing(int i, int j) {
-        char piece = board[i][j];
-        check(i, j+1, piece);
-        check(i, j-1, piece);
-        check(i+1, j, piece);
-        check(i-1, j, piece);
-
-        check(i-1, j-1, piece);
-        check(i+1, j+1, piece);
-        check(i-1, j+1, piece);
-        check(i+1, j-1, piece);
     }
 
     public void moveRook(int i, int j) {
