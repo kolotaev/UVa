@@ -30,30 +30,27 @@ public class Main {
                 block++;
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             e.printStackTrace();
             System.out.println();
         }
     }
 
     public String run(String[] candidates, String[] ballots) {
-        int[] ratings = getRatings(ballots);
+        int[] firstOnes = getRatingsOf("first", ballots);
+        int[] lastOnes = getRatingsOf("last", ballots);
         return "2";
     }
 
-    public int[] getRatings(String[] ballots) {
-        int[] ratings = new int[Integer.parseInt(ballots[0])];
+    public int[] getRatingsOf(String type, String[] ballots) {
+        int[] result = new int[ballots[0].split("\\s").length + 1];
 
         for (String ballot : ballots) {
-            if (ballot.equals("")) break;
-
+            if (ballot == null) break;
             String[] votes = ballot.split("\\s");
-            for (String vote : votes) {
-                int candidateIdx = Integer.parseInt(vote);
-                ratings[candidateIdx]++;
-            }
+            String candidate = (type.equals("first")) ? votes[0] : votes[votes.length-1];
+            result[Integer.parseInt(candidate)]++;
         }
 
-        return ratings;
+        return result;
     }
 }
