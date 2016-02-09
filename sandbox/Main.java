@@ -37,6 +37,23 @@ public class Main {
     }
 
     public String run(String[] candidates, String[] ballots) {
+        int[] ratings = getRatings(ballots);
         return "2";
+    }
+
+    public int[] getRatings(String[] ballots) {
+        int[] ratings = new int[Integer.parseInt(ballots[0])];
+
+        for (String ballot : ballots) {
+            if (ballot.equals("")) break;
+
+            String[] votes = ballot.split("\\s");
+            for (String vote : votes) {
+                int candidateIdx = Integer.parseInt(vote);
+                ratings[candidateIdx]++;
+            }
+        }
+
+        return ratings;
     }
 }
