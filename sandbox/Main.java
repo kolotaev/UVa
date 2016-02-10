@@ -2,8 +2,6 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
-    private String[] candidates;
-
     public static void main(String[] args) {
         try {
             System.setIn(new FileInputStream(args[0]));
@@ -35,10 +33,13 @@ public class Main {
         }
     }
 
-    public String run(String[] candidates, String[] ballots) {
+    public String[] run(String[] candidates, String[] ballots) {
         int[] firstOnes = getRatingsOf("first", ballots);
-        int[] lastOnes = getRatingsOf("last", ballots);
-        return "2";
+        int winner = getWinner(firstOnes, ballots.length);
+
+        if (winner != 0) return getWinnersList(new int[] {winner}, candidates);
+        else if (allEqual(firstOnes)) return candidates;
+        else run(getNonLoosersList(candidates), ballots);
     }
 
     public int[] getRatingsOf(String type, String[] ballots) {
@@ -52,5 +53,31 @@ public class Main {
         }
 
         return result;
+    }
+
+    public int getWinner(int[] firstOnes, int total) {
+        if (firstOnes.length >= 1 && (total - firstOnes[1] < firstOnes[1])) return firstOnes[1];
+        else return 0;
+    }
+
+    public boolean allEqual(int[] firstOnes) {
+        if (firstOnes.length == 0) return false;
+        int sample = firstOnes[1];
+        for (int i = 2; i < firstOnes.length; i++)
+            if (firstOnes[i] != sample) return false;
+        return true;
+    }
+
+    public String[] getWinnersList(int[] winners, String[] candidates) {
+        String[] list = new String[winners.length-1];
+        for (int i = 0; i < winners.length; i++)
+            list[i] = candidates[winners[i]];
+        return list;
+    }
+
+    public String[] getNonLoosersList(String [] candidates) {
+        String[] result;
+
+        //return result;
     }
 }
