@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.*;
+import com.sun.deploy.util.StringUtils;
 
 public class Main {
     public static void main(String[] args) {
@@ -24,7 +25,7 @@ public class Main {
                     nextBallot = (in.hasNextLine()) ? in.nextLine() : "";
                     ballotNum++;
                 }
-                System.out.println(aMain.run(candidates, ballots));
+                System.out.println(StringUtils.join(Arrays.asList(aMain.run(candidates, ballots)), ", "));
                 block++;
             }
         } catch (Exception e) {
@@ -34,12 +35,14 @@ public class Main {
     }
 
     public String[] run(String[] candidates, String[] ballots) {
+        String[] result;
         int[] firstOnes = getRatingsOf("first", ballots);
         int winner = getWinner(firstOnes, ballots.length);
 
         if (winner != 0) return getWinnersList(new int[] {winner}, candidates);
         else if (allEqual(firstOnes)) return candidates;
-        else run(getNonLoosersList(candidates), ballots);
+        else result = run(getNonLoosersList(candidates, getRatingsOf("last", ballots)), ballots);
+        return result;
     }
 
     public int[] getRatingsOf(String type, String[] ballots) {
@@ -75,9 +78,12 @@ public class Main {
         return list;
     }
 
-    public String[] getNonLoosersList(String [] candidates) {
-        String[] result;
+    public String[] getNonLoosersList(String[] candidates, int[] winners) {
+        ArrayList<String> list = new ArrayList<>();
+        for (int i = winners.length-2; i <= 1; i--)
+            if (winners[i] != winners[winners.length-2]) list.add(candidates[winners[i]]);
 
-        //return result;
+        Collections.reverse(list);
+        return list.toArray(new String[list.size()]);
     }
 }
