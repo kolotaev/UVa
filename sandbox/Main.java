@@ -3,29 +3,40 @@ import java.util.*;
 import com.sun.deploy.util.StringUtils;
 
 public class Main {
+    private TreeMap<Integer, String> activeCandidates;
+    private String[] ballots;
+
     public static void main(String[] args) {
         try {
             System.setIn(new FileInputStream(args[0]));
             Scanner in = new Scanner(new BufferedInputStream(System.in));
-            Main aMain = new Main();
             int blocks = Integer.parseInt(in.nextLine());
             int block = 0;
             if (in.hasNextLine()) in.nextLine();
             while (block < blocks) {
-                String[] candidates = new String[Integer.parseInt(in.nextLine())];
-                String[] ballots = new String[1000];
-                int ballotNum = 0;
-                for (int i = 0; i < candidates.length; i++) {
-                    candidates[i] = in.nextLine();
-                }
+                int candidatesNumber = Integer.parseInt(in.nextLine());
+                TreeMap<Integer, String> allCandidates = new TreeMap<>();
+                TreeMap<Integer, ArrayList<String>> ratings = new TreeMap<>();
+                ArrayList<String> ballots = new ArrayList<>();
+                ArrayList<String> candidateNames = new ArrayList<>();
                 String nextBallot = "";
+
+                for (int i = 1; i <= candidatesNumber; i++) {
+                    String name = in.nextLine();
+                    allCandidates.put(i, name);
+                    candidateNames.add(name);
+                }
+                ratings.put(0, candidateNames);
+
                 if (in.hasNextLine()) nextBallot = in.nextLine();
                 while (!nextBallot.equals("")) {
-                    ballots[ballotNum] = nextBallot;
+                    ballots.add(nextBallot);
                     nextBallot = (in.hasNextLine()) ? in.nextLine() : "";
-                    ballotNum++;
                 }
-                System.out.println(StringUtils.join(Arrays.asList(aMain.run(candidates, ballots)), ", "));
+
+                Main aMain = new Main(allCandidates, ballots.toArray(new String[ballots.size()]));
+                ArrayList<String> result = aMain.run(ratings);
+                System.out.println(StringUtils.join(result, ", "));
                 block++;
             }
         } catch (Exception e) {
@@ -34,56 +45,76 @@ public class Main {
         }
     }
 
-    public String[] run(String[] candidates, String[] ballots) {
-        String[] result;
-        int[] firstOnes = getRatingsOf("first", ballots);
-        int winner = getWinner(firstOnes, ballots.length);
-
-        if (winner != 0) return getWinnersList(new int[] {winner}, candidates);
-        else if (allEqual(firstOnes)) return candidates;
-        else result = run(getNonLoosersList(candidates, getRatingsOf("last", ballots)), ballots);
-        return result;
+    public Main(TreeMap<Integer, String> allCandidates, String[] givenBallots) {
+        activeCandidates = allCandidates;
+        ballots = givenBallots;
     }
 
-    public int[] getRatingsOf(String type, String[] ballots) {
-        int[] result = new int[ballots[0].split("\\s").length + 1];
-
-        for (String ballot : ballots) {
-            if (ballot == null) break;
-            String[] votes = ballot.split("\\s");
-            String candidate = (type.equals("first")) ? votes[0] : votes[votes.length-1];
-            result[Integer.parseInt(candidate)]++;
+    public ArrayList<String> run(TreeMap<Integer, ArrayList<String>> ratings) {
+        processBallots(ratings);
+        ArrayList<String> result = getWinners(ratings);
+        if (result.size() == 0) {
+            eliminateLastOnes(ratings);
+            run(ratings);
         }
 
         return result;
     }
 
-    public int getWinner(int[] firstOnes, int total) {
-        if (firstOnes.length >= 1 && (total - firstOnes[1] < firstOnes[1])) return firstOnes[1];
-        else return 0;
+    public void processBallots(TreeMap<Integer, ArrayList<String>> ratings) {
+        for (String ballot : ballots) {
+
+            String[] votes = ballot.split("\\s");
+            for (int v = 0; v < votes.length; v++) {
+
+            }
+
+
+            int winner = Integer.parseInt(ballot.split("\\s")[0]);
+            String winnerName = activeCandidates.get(winner);
+            int winnerIdxInTree = 0;
+
+            for (Map.Entry<Integer, ArrayList<String>> entry : ratings.entrySet()) {
+                winnerIdxInTree = entry.getKey();
+                ArrayList<String> positionCandidates = entry.getValue();
+                int pos = positionCandidates.indexOf(winnerName);
+                if (pos != -1) {
+                    positionCandidates.remove(pos);
+                    ratings.put(winnerIdxInTree, positionCandidates);
+                    break;
+                }
+            }
+
+            if (ratings.get(winnerIdxInTree).size() == 0) ratings.remove(winnerIdxInTree);
+            winnerIdxInTree++;
+            ArrayList<String> winnerSiblings = ratings.get(winnerIdxInTree);
+            if (winnerSiblings == null) winnerSiblings = new ArrayList<>();
+            winnerSiblings.add(winnerName);
+            ratings.put(winnerIdxInTree, winnerSiblings);
+
+
+
+
+        }
     }
 
-    public boolean allEqual(int[] firstOnes) {
-        if (firstOnes.length == 0) return false;
-        int sample = firstOnes[1];
-        for (int i = 2; i < firstOnes.length; i++)
-            if (firstOnes[i] != sample) return false;
-        return true;
+    public ArrayList<String> getWinners(TreeMap<Integer, ArrayList<String>> ratings) {
+        int winnerVotes = ratings.lastKey();
+        ArrayList<String> winners = ratings.lastEntry().getValue();
+
+        if (winners.size() == activeCandidates.size()) return winners;
+        else if (winners.size() == 1 && (activeCandidates.size() - winnerVotes < winnerVotes)) return winners;
+        else return new ArrayList<>();
     }
 
-    public String[] getWinnersList(int[] winners, String[] candidates) {
-        String[] list = new String[winners.length-1];
-        for (int i = 0; i < winners.length; i++)
-            list[i] = candidates[winners[i]];
-        return list;
-    }
+    public void eliminateLastOnes(TreeMap<Integer, ArrayList<String>> ratings) {
+        ArrayList<String> lostOnes = ratings.firstEntry().getValue();
+        ratings.remove(ratings.firstKey());
 
-    public String[] getNonLoosersList(String[] candidates, int[] winners) {
-        ArrayList<String> list = new ArrayList<>();
-        for (int i = winners.length-2; i <= 1; i--)
-            if (winners[i] != winners[winners.length-2]) list.add(candidates[winners[i]]);
-
-        Collections.reverse(list);
-        return list.toArray(new String[list.size()]);
+        for (Map.Entry<Integer, String> entry : activeCandidates.entrySet()) {
+            int key = entry.getKey();
+            String name = entry.getValue();
+            if (lostOnes.contains(name)) activeCandidates.remove(key);
+        }
     }
 }
