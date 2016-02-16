@@ -55,12 +55,12 @@ public class Main {
     }
 
     public ArrayList<String> run(TreeMap<Integer, ArrayList<String>> ratings) {
-        processBallots(ratings);
-        ArrayList<String> result = getWinners(ratings);
-        if (result.size() == 0) {
+        ArrayList<String> result;
+        do {
+            processBallots(ratings);
+            result = getWinners(ratings);
             eliminateLastOnes(ratings);
-            result = run(ratings);
-        }
+        } while (result.size() == 0);
 
         return result;
     }
@@ -109,8 +109,9 @@ public class Main {
     public void eliminateLastOnes(TreeMap<Integer, ArrayList<String>> ratings) {
         ArrayList<String> lostOnes = ratings.firstEntry().getValue();
         ratings.remove(ratings.firstKey());
+        TreeMap<Integer, String> copy = (TreeMap<Integer, String>)activeCandidates.clone();
 
-        for (Map.Entry<Integer, String> entry : activeCandidates.entrySet()) {
+        for (Map.Entry<Integer, String> entry : copy.entrySet()) {
             int key = entry.getKey();
             String name = entry.getValue();
             if (lostOnes.contains(name)) activeCandidates.remove(key);
