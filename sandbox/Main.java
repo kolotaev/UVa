@@ -4,29 +4,24 @@ import java.util.*;
 public class Main {
     private TreeMap<Integer, String> activeCandidates;
     private String[] ballots;
-    private int initialCandidatesSize;
 
     public static void main(String[] args) {
         try {
             System.setIn(new FileInputStream(args[0]));
             Scanner in = new Scanner(new BufferedInputStream(System.in));
+            Main aMain = new Main();
             int blocks = Integer.parseInt(in.nextLine());
             int block = 0;
             if (in.hasNextLine()) in.nextLine();
             while (block < blocks) {
                 int candidatesNumber = Integer.parseInt(in.nextLine());
                 TreeMap<Integer, String> allCandidates = new TreeMap<>();
-                TreeMap<Integer, ArrayList<String>> ratings = new TreeMap<>();
                 ArrayList<String> ballots = new ArrayList<>();
-                ArrayList<String> candidateNames = new ArrayList<>();
                 String nextBallot = "";
 
                 for (int i = 1; i <= candidatesNumber; i++) {
-                    String name = in.nextLine();
-                    allCandidates.put(i, name);
-                    candidateNames.add(name);
+                    allCandidates.put(i, in.nextLine());
                 }
-                ratings.put(0, candidateNames);
 
                 if (in.hasNextLine()) nextBallot = in.nextLine();
                 while (!nextBallot.equals("")) {
@@ -34,10 +29,9 @@ public class Main {
                     nextBallot = (in.hasNextLine()) ? in.nextLine() : "";
                 }
 
-                Main aMain = new Main(allCandidates, ballots.toArray(new String[ballots.size()]));
-                ArrayList<String> result = aMain.run(ratings);
-                for (String name : result) {
-                    System.out.println(name);
+                TreeMap<Integer, String> result = aMain.run(allCandidates, ballots.toArray(new String[ballots.size()]));
+                for (Map.Entry<Integer, String> entry : result.entrySet()) {
+                    System.out.println(entry.getValue());
                 }
                 System.out.println();
                 block++;
@@ -48,15 +42,15 @@ public class Main {
         }
     }
 
-    public Main(TreeMap<Integer, String> allCandidates, String[] givenBallots) {
+    public TreeMap<Integer, String> run(TreeMap<Integer, String> allCandidates, String[] givenBallots) {
         activeCandidates = allCandidates;
         ballots = givenBallots;
-        initialCandidatesSize = allCandidates.size();
-    }
 
-    public ArrayList<String> run(TreeMap<Integer, ArrayList<String>> ratings) {
-        ArrayList<String> result;
+        TreeMap<Integer, TreeMap<Integer, String>> ratings = new TreeMap<>();
+        TreeMap<Integer, String> result;
+
         do {
+            ratings.put(0, (TreeMap<Integer, String>)allCandidates.clone());
             processBallots(ratings);
             result = getWinners(ratings);
             eliminateLastOnes(ratings);
@@ -65,56 +59,54 @@ public class Main {
         return result;
     }
 
-    public void processBallots(TreeMap<Integer, ArrayList<String>> ratings) {
+    public void processBallots(TreeMap<Integer, TreeMap<Integer, String>> ratings) {
         for (String ballot : ballots) {
             String[] votes = ballot.split("\\s");
             for (int v = 0; v < votes.length; v++) {
-                int winner = Integer.parseInt(ballot.split("\\s")[v]);
-                if (activeCandidates.containsKey(winner)) {
-                    String winnerName = activeCandidates.get(winner);
-                    int winnerIdxInTree = 0;
+                int winnerKey = Integer.parseInt(ballot.split("\\s")[v]);
+                if (activeCandidates.containsKey(winnerKey)) {
+                    String winnerName = activeCandidates.get(winnerKey);
+                    int winnerIdxInRatings = 0;
 
-                    for (Map.Entry<Integer, ArrayList<String>> entry : ratings.entrySet()) {
-                        winnerIdxInTree = entry.getKey();
-                        ArrayList<String> positionCandidates = entry.getValue();
-                        int pos = positionCandidates.indexOf(winnerName);
-                        if (pos != -1) {
-                            positionCandidates.remove(pos);
-                            ratings.put(winnerIdxInTree, positionCandidates);
+                    for (Map.Entry<Integer, TreeMap<Integer, String>> entry : ratings.entrySet()) {
+                        winnerIdxInRatings = entry.getKey();
+                        TreeMap<Integer, String> positionCandidates = entry.getValue();
+                        if (positionCandidates.get(winnerKey) != null) {
+                            positionCandidates.remove(winnerKey);
+                            ratings.put(winnerIdxInRatings, positionCandidates);
                             break;
                         }
                     }
 
-                    if (ratings.get(winnerIdxInTree).size() == 0) ratings.remove(winnerIdxInTree);
-                    winnerIdxInTree++;
-                    ArrayList<String> winnerSiblings = ratings.get(winnerIdxInTree);
-                    if (winnerSiblings == null) winnerSiblings = new ArrayList<>();
-                    winnerSiblings.add(winnerName);
-                    ratings.put(winnerIdxInTree, winnerSiblings);
+                    if (ratings.get(winnerIdxInRatings).size() == 0) ratings.remove(winnerIdxInRatings);
+                    winnerIdxInRatings++;
+                    TreeMap<Integer, String> winnerSiblings = ratings.get(winnerIdxInRatings);
+                    if (winnerSiblings == null) winnerSiblings = new TreeMap<>();
+                    winnerSiblings.put(winnerKey, winnerName);
+                    ratings.put(winnerIdxInRatings, winnerSiblings);
                     break;
                 }
             }
         }
     }
 
-    public ArrayList<String> getWinners(TreeMap<Integer, ArrayList<String>> ratings) {
+    public TreeMap<Integer, String> getWinners(TreeMap<Integer, TreeMap<Integer, String>> ratings) {
         int winnerVotes = ratings.lastKey();
-        ArrayList<String> winners = ratings.lastEntry().getValue();
+        TreeMap<Integer, String> winners = ratings.lastEntry().getValue();
 
         if (winners.size() == activeCandidates.size()) return winners;
-        else if (winners.size() == 1 && (initialCandidatesSize - winnerVotes < winnerVotes)) return winners;
-        else return new ArrayList<>();
+        else if (winners.size() == 1 && (winnerVotes > ballots.length - winnerVotes)) return winners;
+        else return new TreeMap<>();
     }
 
-    public void eliminateLastOnes(TreeMap<Integer, ArrayList<String>> ratings) {
-        ArrayList<String> lostOnes = ratings.firstEntry().getValue();
+    public void eliminateLastOnes(TreeMap<Integer, TreeMap<Integer, String>> ratings) {
+        TreeMap<Integer, String> lostOnes = ratings.firstEntry().getValue();
         ratings.remove(ratings.firstKey());
         TreeMap<Integer, String> copy = (TreeMap<Integer, String>)activeCandidates.clone();
 
         for (Map.Entry<Integer, String> entry : copy.entrySet()) {
             int key = entry.getKey();
-            String name = entry.getValue();
-            if (lostOnes.contains(name)) activeCandidates.remove(key);
+            if (lostOnes.containsKey(key)) activeCandidates.remove(key);
         }
     }
 }
