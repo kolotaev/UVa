@@ -3,11 +3,10 @@ import java.util.*;
 
 public class Main {
     private TreeMap<Integer, String> activeCandidates;
-    private String[] ballots;
+    private int[][] ballots;
 
     public static void main(String[] args) {
         try {
-            System.setIn(new FileInputStream(args[0]));
             Scanner in = new Scanner(new BufferedInputStream(System.in));
             Main aMain = new Main();
             int blocks = Integer.parseInt(in.nextLine());
@@ -28,12 +27,11 @@ public class Main {
                     ballots.add(nextBallot);
                     nextBallot = (in.hasNextLine()) ? in.nextLine() : "";
                 }
-
+                if (block > 0) System.out.println();
                 TreeMap<Integer, String> result = aMain.run(allCandidates, ballots.toArray(new String[ballots.size()]));
                 for (Map.Entry<Integer, String> entry : result.entrySet()) {
                     System.out.println(entry.getValue());
                 }
-                System.out.println();
                 block++;
             }
         } catch (Exception e) {
@@ -44,7 +42,7 @@ public class Main {
 
     public TreeMap<Integer, String> run(TreeMap<Integer, String> allCandidates, String[] givenBallots) {
         activeCandidates = allCandidates;
-        ballots = givenBallots;
+        ballots = ballotsToDigits(givenBallots);
 
         TreeMap<Integer, TreeMap<Integer, String>> ratings = new TreeMap<>();
         TreeMap<Integer, String> result;
@@ -60,33 +58,28 @@ public class Main {
     }
 
     public void processBallots(TreeMap<Integer, TreeMap<Integer, String>> ratings) {
-        for (String ballot : ballots) {
-            String[] votes = ballot.split("\\s");
-            for (int v = 0; v < votes.length; v++) {
-                int winnerKey = Integer.parseInt(ballot.split("\\s")[v]);
-                if (activeCandidates.containsKey(winnerKey)) {
-                    String winnerName = activeCandidates.get(winnerKey);
-                    int winnerIdxInRatings = 0;
+        for (int[] ballot : ballots) {
+            int winnerKey = ballot[0];
 
-                    for (Map.Entry<Integer, TreeMap<Integer, String>> entry : ratings.entrySet()) {
-                        winnerIdxInRatings = entry.getKey();
-                        TreeMap<Integer, String> positionCandidates = entry.getValue();
-                        if (positionCandidates.get(winnerKey) != null) {
-                            positionCandidates.remove(winnerKey);
-                            ratings.put(winnerIdxInRatings, positionCandidates);
-                            break;
-                        }
-                    }
+            String winnerName = activeCandidates.get(winnerKey);
+            int winnerIdxInRatings = 0;
 
-                    if (ratings.get(winnerIdxInRatings).size() == 0) ratings.remove(winnerIdxInRatings);
-                    winnerIdxInRatings++;
-                    TreeMap<Integer, String> winnerSiblings = ratings.get(winnerIdxInRatings);
-                    if (winnerSiblings == null) winnerSiblings = new TreeMap<>();
-                    winnerSiblings.put(winnerKey, winnerName);
-                    ratings.put(winnerIdxInRatings, winnerSiblings);
+            for (Map.Entry<Integer, TreeMap<Integer, String>> entry : ratings.entrySet()) {
+                winnerIdxInRatings = entry.getKey();
+                TreeMap<Integer, String> positionCandidates = entry.getValue();
+                if (positionCandidates.get(winnerKey) != null) {
+                    positionCandidates.remove(winnerKey);
+                    ratings.put(winnerIdxInRatings, positionCandidates);
                     break;
                 }
             }
+
+            if (ratings.get(winnerIdxInRatings).size() == 0) ratings.remove(winnerIdxInRatings);
+            winnerIdxInRatings++;
+            TreeMap<Integer, String> winnerSiblings = ratings.get(winnerIdxInRatings);
+            if (winnerSiblings == null) winnerSiblings = new TreeMap<>();
+            winnerSiblings.put(winnerKey, winnerName);
+            ratings.put(winnerIdxInRatings, winnerSiblings);
         }
     }
 
@@ -108,5 +101,32 @@ public class Main {
             int key = entry.getKey();
             if (lostOnes.containsKey(key)) activeCandidates.remove(key);
         }
+
+        int[][] newBallots = new int[ballots.length][];
+        for (int b = 0; b < ballots.length; b++) {
+            int[] votes = ballots[b];
+            ArrayList<Integer> newVotes = new ArrayList<>();
+            for (int vote : votes) {
+                if (activeCandidates.containsKey(vote)) newVotes.add(vote);
+            }
+            int[] newVotesInt = new int[newVotes.size()];
+            for (int j = 0; j < newVotes.size(); j++)
+                newVotesInt[j] = newVotes.get(j);
+            newBallots[b] = newVotesInt;
+        }
+        ballots = newBallots;
+    }
+
+    private int[][] ballotsToDigits(String[] ballots) {
+        int[][] result = new int[ballots.length][];
+        for (int b = 0; b < ballots.length; b++) {
+            String[] votes = ballots[b].split("\\s");
+            int[] votesInt = new int[votes.length];
+            for (int i = 0; i < votes.length; i++) {
+                votesInt[i] = Integer.parseInt(votes[i]);
+            }
+            result[b] = votesInt;
+        }
+        return result;
     }
 }
